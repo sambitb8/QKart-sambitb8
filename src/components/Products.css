@@ -1,3 +1,6 @@
+.container--box {
+  min-height: 70vh;
+}
 .search {
   min-width: 24rem;
   position: relative;

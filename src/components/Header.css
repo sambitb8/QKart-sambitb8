@@ -24,4 +24,7 @@
     .username-text {
         display: block;
     }
+    .search-box {
+        width: 25%;
+    }
 }

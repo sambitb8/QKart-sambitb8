@@ -1,6 +1,13 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Search } from "@mui/icons-material";
 import Divider from "@mui/material/Divider";
-import { Avatar, Button, Stack } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Stack,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
@@ -9,7 +16,7 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import "./Header.css";
 
-const Header = ({ children, hasHiddenAuthButtons }) => {
+const Header = ({ children, hasHiddenAuthButtons, performSearch, debounceSearch }) => {
   const StyledBadge = styled(Badge)(({ theme }) => ({
     "& .MuiBadge-badge": {
       backgroundColor: "#44b700",
@@ -43,14 +50,35 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
 
   const clearLogin = () => {
     localStorage.clear();
-    history.push("/login", {from: "/"});
-  }
+    history.push("/login", { from: "/" });
+  };
 
   return (
     <Box className="header">
       <Box className="header-title">
         <img src="logo_light.svg" alt="QKart-icon"></img>
       </Box>
+
+      {children && (
+        <Box className="search-box">
+          <TextField
+            className="search-desktop"
+            size="small"
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="Search for items/categories"
+            name="search"
+            onChange={e => debounceSearch(e, 500)}
+          />
+        </Box>
+      )}
+
       {hasHiddenAuthButtons ? (
         <Button
           className="explore-button"
@@ -95,10 +123,18 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
           divider={<Divider orientation="vertical" flexItem />}
           spacing={2}
         >
-          <Button size="large" variant="text" onClick={() => history.push("/login", {from: "/"})}>
+          <Button
+            size="large"
+            variant="text"
+            onClick={() => history.push("/login", { from: "/" })}
+          >
             LOGIN
           </Button>
-          <Button size="large" variant="contained" onClick={() => history.push("/register", {from: "/"})}>
+          <Button
+            size="large"
+            variant="contained"
+            onClick={() => history.push("/register", { from: "/" })}
+          >
             REGISTER
           </Button>
         </Stack>
