@@ -1,6 +1,20 @@
 .container--box {
   min-height: 70vh;
 }
+
+.product-container {
+  display: flex;
+}
+
+.product-list {
+  min-width: 75%;
+}
+
+.product-cart {
+  background-color: #E9F5E1;
+  min-width: 100%;
+}
+
 .search {
   min-width: 24rem;
   position: relative;
@@ -71,5 +85,15 @@
   }
   .search-desktop {
     display: block !important;
+  }
+  .product-container {
+    flex-direction: column;
+  }
+  .product-list {
+    max-width: 75%;
+  }
+  .product-cart {
+    min-width: 25%;
+    max-width: 25%;
   }
 }

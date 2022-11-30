@@ -31,7 +31,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
         <Rating name="read-only" value={product.rating} readOnly />
       </CardContent>
       <CardActions>
-        <Button sx={{width: "100%"}} size="large" variant="contained" color="primary">
+        <Button sx={{width: "100%"}} size="large" variant="contained" color="primary" onClick={() => handleAddToCart(product)}>
         <Stack
           direction="row"
           spacing={1}

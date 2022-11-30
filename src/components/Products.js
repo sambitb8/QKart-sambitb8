@@ -14,6 +14,8 @@ import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
 import ProductCard from "./ProductCard";
+import Cart from "./Cart";
+import { generateCartItemsFrom } from "./Cart";
 
 // Definition of Data Structures used
 /**
@@ -30,8 +32,10 @@ import ProductCard from "./ProductCard";
 const Products = () => {
   const [product, setProduct] = useState([]);
   const [stopLoad, setStopLoad] = useState(false);
+  const [cartData, setCartData] = useState([]);
 
   const url = `${config.endpoint}/products`;
+  const urlCart = `${config.endpoint}/cart`;
 
   const { enqueueSnackbar } = useSnackbar();
   let timer;
@@ -136,85 +140,210 @@ const Products = () => {
    */
   const debounceSearch = (event, debounceTimeout) => {
     timer && clearTimeout(timer);
-    timer = setTimeout(() => performSearch(event.target.value), debounceTimeout);
+    timer = setTimeout(
+      () => performSearch(event.target.value),
+      debounceTimeout
+    );
   };
+
+  const fetchCart = async (token) => {
+    try {
+      if (!token) return;
+      const res = await axios.get(urlCart, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      setCartData(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const isItemInCart = (items, productId) => {
+    return items.findIndex((item) => item.productId === productId) !== -1;
+  };
+
+  const addToCart = async (
+    token,
+    items,
+    products,
+    productId,
+    qty,
+    options = { preventDuplicate: false }
+  ) => {
+    if (!token) {
+      enqueueSnackbar("Login to add an item to the Cart", {
+        variant: "warning",
+        autoHideDuration: 2000,
+      });
+      return;
+    }
+
+    if (options.preventDuplicate && isItemInCart(items, productId)) {
+      enqueueSnackbar(
+        "Item already in cart. Use the cart sidebar to update quantity or remove item.",
+        { variant: "warning", autoHideDuration: 2000 }
+      );
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        urlCart,
+        { productId, qty },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setCartData(res.data);
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  // const handleAdd = (product) => {
+  //   const newCartData = cartData.map((data) => {
+  //     if (data.productId === product._id) {
+  //       data.qty++;
+  //       return data;
+  //     }
+  //     return data;
+  //   });
+
+  //   setCartData(newCartData);
+  // };
+
+  // const handleDelete = (product) => {
+  //   let index;
+  //   const newCartData = cartData.map((data, idx) => {
+  //     if (data.productId === product._id && data.qty > 0) {
+  //       data.qty--;
+  //       if(data.qty === 0) index = idx;
+  //       return data;
+  //     }
+  //     return data;
+  //   });
+  //   index && newCartData.splice(index, 1);
+  //   setCartData(newCartData);
+  // };
 
   useEffect(() => {
     performAPICall();
+    fetchCart(localStorage.getItem("token"));
   }, []);
 
   return (
     <Box>
-      <Header children performSearch={performSearch} debounceSearch={debounceSearch} />
+      <Header
+        children
+        performSearch={performSearch}
+        debounceSearch={debounceSearch}
+      />
 
       {/* Search view for mobiles */}
-      <TextField
-        className="search-mobile"
-        size="small"
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <Search color="primary" />
-            </InputAdornment>
-          ),
-        }}
-        placeholder="Search for items/categories"
-        name="search"
-        onChange={e => debounceSearch(e, 500)}
-      />
-      <Grid container spacing={{ xs: 2, md: 3 }} className="container--box">
-        <Grid item className="product-grid">
-          <Box className="hero">
-            <p className="hero-heading">
-              India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
-              to your door step
-            </p>
-          </Box>
-        </Grid>
-        <Grid container item sx={{ mr: 3, ml: 1, mb: 10 }} spacing={3}>
-          {product.length > 0 ? (
-            product.map((p) => {
-              return (
-                <Grid item xs={6} md={3}>
-                  <ProductCard product={p} />{" "}
+      <Grid container className="product-container">
+        <Grid
+          container
+          item
+          className={localStorage.getItem("token") && "product-list"}
+        >
+          <TextField
+            className="search-mobile"
+            size="small"
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="Search for items/categories"
+            name="search"
+            onChange={(e) => debounceSearch(e, 500)}
+          />
+          <Grid container spacing={{ xs: 2, md: 3 }} className="container--box">
+            <Grid item className="product-grid">
+              <Box className="hero">
+                <p className="hero-heading">
+                  India’s{" "}
+                  <span className="hero-highlight">FASTEST DELIVERY</span> to
+                  your door step
+                </p>
+              </Box>
+            </Grid>
+            <Grid container item sx={{ mr: 3, ml: 1, mb: 10 }} spacing={3}>
+              {product.length > 0 ? (
+                product.map((p) => {
+                  return (
+                    <Grid item xs={6} md={3}>
+                      <ProductCard
+                        product={p}
+                        handleAddToCart={async () =>
+                          await addToCart(
+                            window.localStorage.getItem("token"),
+                            cartData,
+                            product,
+                            p._id,
+                            1,
+                            { preventDuplicate: true }
+                          )
+                        }
+                      />{" "}
+                    </Grid>
+                  );
+                })
+              ) : stopLoad ? (
+                <Grid
+                  container
+                  item
+                  direction="column"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  spacing={3}
+                >
+                  <Grid item>
+                    <SentimentDissatisfied />
+                  </Grid>
+                  <Grid item>
+                    <strong>No products found</strong>
+                  </Grid>
                 </Grid>
-              );
-            })
-          ) : stopLoad ? (
-            <Grid
-              container
-              item
-              direction="column"
-              justifyContent="flex-start"
-              alignItems="center"
-              spacing={3}
-            >
-              <Grid item>
-                <SentimentDissatisfied />
-              </Grid>
-              <Grid item>
-                <strong>No products found</strong>
-              </Grid>
+              ) : (
+                <Grid
+                  container
+                  item
+                  direction="column"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  spacing={3}
+                >
+                  <Grid item>
+                    <CircularProgress />
+                  </Grid>
+                  <Grid item>
+                    <strong>Loading Products...</strong>
+                  </Grid>
+                </Grid>
+              )}
             </Grid>
-          ) : (
-            <Grid
-              container
-              item
-              direction="column"
-              justifyContent="flex-start"
-              alignItems="center"
-              spacing={3}
-            >
-              <Grid item>
-                <CircularProgress />
-              </Grid>
-              <Grid item>
-                <strong>Loading Products...</strong>
-              </Grid>
-            </Grid>
-          )}
+          </Grid>
         </Grid>
+        {localStorage.getItem("token") && (
+          <Grid item className="product-cart">
+            <Cart
+              products={product}
+              items={generateCartItemsFrom(cartData, product)}
+              handleQuantity={addToCart}
+            />
+          </Grid>
+        )}
       </Grid>
       <Footer />
     </Box>

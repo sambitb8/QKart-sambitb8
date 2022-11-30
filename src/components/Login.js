@@ -3,7 +3,7 @@ import { Box } from "@mui/system";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, { useState } from "react";
-import {Link } from "react-router-dom";
+import {useHistory, Link } from "react-router-dom";
 import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -13,6 +13,8 @@ const Login = () => {
   const url = `${config.endpoint}/auth/login`;
   
   const { enqueueSnackbar } = useSnackbar();
+
+  const history = useHistory();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -95,7 +97,8 @@ const Login = () => {
         username: "",
         password: ""
       });
-      res.status === 201 && enqueueSnackbar("Logged in successfully", {variant: "success", autoHideDuration: 2000})
+      res.status === 201 && enqueueSnackbar("Logged in successfully", {variant: "success", autoHideDuration: 2000});
+      history.push("/", {from: "/login"});
       persistLogin(res.data.token, res.data.username, res.data.balance);
     } catch(err) {
       setFormData({
