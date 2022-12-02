@@ -5,8 +5,8 @@ var { users, products } = require("../db");
 
 // Cart Controller
 router.get("/", verifyAuth, (req, res) => {
-  console.log(req.user.cart);
   console.log(`GET request to "/cart" received`);
+
   return res.status(200).json(req.user.cart);
 });
 

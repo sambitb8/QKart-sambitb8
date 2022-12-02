@@ -1,38 +1,66 @@
 #add-new-btn {
-    text-transform: none;
-    font-weight: 700;
-    margin: 1rem 0;
+  text-transform: none;
+  font-weight: 700;
+  margin: 1rem 0;
 }
 
 .address-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 5px;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .shipping-container {
-    padding: 2rem 1rem;
+  padding: 2rem 1rem;
+}
+
+.order-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+}
+
+.order-header {
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.total-price {
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding-top: 10px;
 }
 
 .selected {
-    border: 1px solid #00A278;
-    background-color: #E9F5E1;
+  border: 1px solid #00a278;
+  background-color: #e9f5e1;
+}
+
+.delete-color {
+  color: #00a278;
+  padding: 0 10px;
+}
+
+.cont-1 {
+  background-color: aqua;
 }
 
 .not-selected {
-    border: 1px solid #ddd;
+  border: 1px solid #ddd;
 }
 
 p {
-    color: #3C3C3C;
+  color: #3c3c3c;
 }
 
 @media screen and (min-width: 768px) {
-    .shipping-container {
-        padding: 2rem 4rem;
-    }
+  .shipping-container {
+    padding: 2rem 4rem;
+  }
 }

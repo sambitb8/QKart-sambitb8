@@ -151,7 +151,7 @@ const Products = () => {
       if (!token) return;
       const res = await axios.get(urlCart, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -195,7 +195,7 @@ const Products = () => {
         { productId, qty },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -206,32 +206,6 @@ const Products = () => {
       console.error(err.message);
     }
   };
-
-  // const handleAdd = (product) => {
-  //   const newCartData = cartData.map((data) => {
-  //     if (data.productId === product._id) {
-  //       data.qty++;
-  //       return data;
-  //     }
-  //     return data;
-  //   });
-
-  //   setCartData(newCartData);
-  // };
-
-  // const handleDelete = (product) => {
-  //   let index;
-  //   const newCartData = cartData.map((data, idx) => {
-  //     if (data.productId === product._id && data.qty > 0) {
-  //       data.qty--;
-  //       if(data.qty === 0) index = idx;
-  //       return data;
-  //     }
-  //     return data;
-  //   });
-  //   index && newCartData.splice(index, 1);
-  //   setCartData(newCartData);
-  // };
 
   useEffect(() => {
     performAPICall();

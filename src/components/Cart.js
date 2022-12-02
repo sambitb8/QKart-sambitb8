@@ -9,6 +9,7 @@ import { Box } from "@mui/system";
 import React from "react";
 import { useHistory } from "react-router-dom";
 import "./Cart.css";
+import { OrderDetails } from "./Checkout";
 
 // Definition of Data Structures used
 /**
@@ -60,7 +61,6 @@ export const generateCartItemsFrom = (cartData, productsData) => {
         qty: cartDataQty[index],
       };
     });
-  console.log(completeCartData);
   return completeCartData;
 };
 
@@ -96,22 +96,40 @@ export const getTotalCartValue = (items = []) => {
  *
  *
  */
-const ItemQuantity = ({ value, handleAdd, handleDelete }) => {
+
+// TODO: CRIO_TASK_MODULE_CHECKOUT - Implement function to return total cart quantity
+/**
+ * Return the sum of quantities of all products added to the cart
+ *
+ * @param { Array.<CartItem> } items
+ *    Array of objects with complete data on products in cart
+ *
+ * @returns { Number }
+ *    Total quantity of products added to the cart
+ *
+ */
+export const getTotalItems = (items = []) => {
+  return items.reduce((acc, item) => acc + item.qty, 0);
+};
+
+const ItemQuantity = ({ isReadOnly, value, handleAdd, handleDelete }) => {
   return (
     <Stack direction="row" alignItems="center">
-      <IconButton
-        size="small"
-        color="primary"
-        onClick={handleDelete}
-      >
-        <RemoveOutlined />
-      </IconButton>
-      <Box padding="0.5rem" data-testid="item-qty">
-        {value}
-      </Box>
-      <IconButton size="small" color="primary" onClick={handleAdd}>
-        <AddOutlined />
-      </IconButton>
+      {!isReadOnly ? (
+        <>
+          <IconButton size="small" color="primary" onClick={handleDelete}>
+            <RemoveOutlined />
+          </IconButton>
+          <Box padding="0.5rem" data-testid="item-qty">
+            {value}
+          </Box>
+          <IconButton size="small" color="primary" onClick={handleAdd}>
+            <AddOutlined />
+          </IconButton>
+        </>
+      ) : (
+        <Box>Qty: {value}</Box>
+      )}
     </Stack>
   );
 };
@@ -130,7 +148,7 @@ const ItemQuantity = ({ value, handleAdd, handleDelete }) => {
  *
  *
  */
-const Cart = ({ products, items = [], handleQuantity }) => {
+const Cart = ({ isReadOnly, products, items = [], handleQuantity }) => {
   const history = useHistory();
 
   if (!items.length) {
@@ -152,7 +170,12 @@ const Cart = ({ products, items = [], handleQuantity }) => {
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */}
         {items.map((product) => {
           return (
-            <Box display="flex" alignItems="flex-start" padding="1rem" key={product._id}>
+            <Box
+              display="flex"
+              alignItems="flex-start"
+              padding="1rem"
+              key={product._id}
+            >
               <Box className="image-container">
                 <img
                   // Add product image
@@ -177,10 +200,11 @@ const Cart = ({ products, items = [], handleQuantity }) => {
                   alignItems="center"
                 >
                   <ItemQuantity
+                    isReadOnly={isReadOnly}
                     value={product.qty}
                     handleAdd={async () => {
                       await handleQuantity(
-                        window.localStorage.getItem('token'),
+                        window.localStorage.getItem("token"),
                         items,
                         products,
                         product._id,
@@ -189,7 +213,7 @@ const Cart = ({ products, items = [], handleQuantity }) => {
                     }}
                     handleDelete={async () => {
                       await handleQuantity(
-                        window.localStorage.getItem('token'),
+                        window.localStorage.getItem("token"),
                         items,
                         products,
                         product._id,
@@ -197,8 +221,9 @@ const Cart = ({ products, items = [], handleQuantity }) => {
                       );
                     }}
                   />
+
                   <Box padding="0.5rem" fontWeight="700">
-                    ${product.cost }
+                    ${product.cost}
                   </Box>
                 </Box>
               </Box>
@@ -225,19 +250,28 @@ const Cart = ({ products, items = [], handleQuantity }) => {
             ${getTotalCartValue(items)}
           </Box>
         </Box>
-
-        <Box display="flex" justifyContent="flex-end" className="cart-footer">
-          <Button
-            color="primary"
-            variant="contained"
-            startIcon={<ShoppingCart />}
-            className="checkout-btn"
-            onClick={() =>  history.push("/checkout")}
-          >
-            Checkout
-          </Button>
-        </Box>
+        {!isReadOnly && (
+          <Box display="flex" justifyContent="flex-end" className="cart-footer">
+            <Button
+              color="primary"
+              variant="contained"
+              startIcon={<ShoppingCart />}
+              className="checkout-btn"
+              onClick={() => history.push("/checkout")}
+            >
+              Checkout
+            </Button>
+          </Box>
+        )}
       </Box>
+      {isReadOnly && (
+        <Box className="cart">
+          <OrderDetails
+            totalProducts={getTotalItems(items)}
+            subtotal={getTotalCartValue(items)}
+          />
+        </Box>
+      )}
     </>
   );
 };
